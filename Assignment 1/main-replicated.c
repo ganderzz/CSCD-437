@@ -11,7 +11,7 @@
 * -------------
 *
 * Notes:
-*	Pretty sure this isn't what Tom wants, but here is a pretty basic self replicating program -Dylan
+*	None
 */
 
 int main(int argv, char ** argc) {
