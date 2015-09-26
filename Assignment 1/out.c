@@ -372,7 +372,5 @@ int main()
 	printf("};\n%s", input);
 	fprintf(fp, "};\n%s", input);
 	fclose(fp);
-	system("gcc -o out -g out.c");
-	system("./out");
 	return 0;
 }
