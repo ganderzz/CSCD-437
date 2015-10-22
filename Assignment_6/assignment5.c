@@ -4,6 +4,8 @@
 #include <regex.h>
 
 #define BUFF_SIZE 50
+#define RED  "\x1B[31m"
+#define WHITE  "\x1B[0m"
 
 typedef enum {false, true} bool;
 
@@ -40,7 +42,7 @@ int main()
 	/* 
 	*	Variable Initialization	
 	*/
-	bool preventPass = true;
+	bool prevent_pass = true;
 	regex_t name_r;
 	const char * name_r_ptrn = "^[a-zA-Z]+$";
 
@@ -49,16 +51,18 @@ int main()
 	u->lname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char *) );
 	u->fname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char *) );
 
+	if( regcomp(&name_r, name_r_ptrn, REG_EXTENDED | REG_NOSUB) )
+	{
+		printf("\n%sWoah Cowpoke, Looks like your regexp library is screwed up.%s\n\n", RED, WHITE);
+		return 1;
+	}
 
 	/* 
 	*	First Name 	
 	*/
-
-	regcomp(&name_r, name_r_ptrn, REG_EXTENDED | REG_NOSUB);
-
-	while( preventPass )
+	while( prevent_pass )
 	{
-		preventPass = false;
+		prevent_pass = false;
 
 		printf("Enter your First Name: ");
 		getInput(u->fname);
@@ -66,20 +70,19 @@ int main()
 		int nomatch = regexec(&name_r, u->fname, 0, NULL, 0);
 		if( nomatch == REG_NOMATCH )
 		{
-			printf("\nFirst Name is invalid, try again.\n\n");
-			preventPass = true;
+			printf("\n%sFirst Name is invalid, try again.%s\n\n", RED, WHITE);
+			prevent_pass = true;
 		}
 	}
-
 
 	/* 
 	*	Last Name 	
 	*/
-	preventPass = true;
+	prevent_pass = true;
 
-	while( preventPass )
+	while( prevent_pass )
 	{
-		preventPass = false;
+		prevent_pass = false;
 
 		printf("Enter your Last Name: ");
 		getInput(u->lname);
@@ -87,15 +90,15 @@ int main()
 		int nomatch = regexec(&name_r, u->lname, 0, NULL, 0);
 		if( nomatch == REG_NOMATCH )
 		{
-			printf("\nLast Name is invalid, try again.\n\n");
-			preventPass = true;
+			printf("\n%sLast Name is invalid, try again.%s\n\n", RED, WHITE);
+			prevent_pass = true;
 		}
 	}
-
 
 	/*
 	*	Print Names
 	*/
+
 	printf("f: %s \nl: %s\n", u->fname, u->lname);
 
 
