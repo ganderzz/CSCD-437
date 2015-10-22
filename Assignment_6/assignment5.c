@@ -3,39 +3,7 @@
 #include <string.h>
 #include <regex.h>
 
-#define BUFF_SIZE 50
-#define RED  "\x1B[31m"
-#define WHITE  "\x1B[0m"
-
-typedef enum {false, true} bool;
-
-typedef struct {
-	char * fname;
-	char * lname;
-	int nums[2];
-}user;
-
-int getInput(char * in)
-{
-	int i;
-	char buff[BUFF_SIZE];
-	memset(buff, '\0', BUFF_SIZE);
-
-	fgets(buff, sizeof(buff), stdin);
-
-	for(i = 0; i < BUFF_SIZE; i++)
-	{
-		if(buff[i] != '\0' & buff[i] != '\n')
-			in[i] = buff[i];
-		else
-		{
-			in[i] = '\0';
-			break;
-		}
-	}
-	
-	return 0;
-}
+#include "helper.h"
 
 int main()
 {
@@ -111,5 +79,27 @@ int main()
 
 	free(u);
 
+	return 0;
+}
+
+int getInput(char * in)
+{
+	int i;
+	char buff[BUFF_SIZE];
+	memset(buff, '\0', BUFF_SIZE);
+
+	fgets(buff, sizeof(buff), stdin);
+
+	for(i = 0; i < BUFF_SIZE; i++)
+	{
+		if(buff[i] != '\0' & buff[i] != '\n')
+			in[i] = buff[i];
+		else
+		{
+			in[i] = '\0';
+			break;
+		}
+	}
+	
 	return 0;
 }
