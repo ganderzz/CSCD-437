@@ -48,8 +48,8 @@ int main()
 
 	user * u = (user *) malloc(sizeof(user));
 
-	u->lname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char *) );
-	u->fname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char *) );
+	u->lname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char) );
+	u->fname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char) );
 
 	if( regcomp(&name_r, name_r_ptrn, REG_EXTENDED | REG_NOSUB) )
 	{
