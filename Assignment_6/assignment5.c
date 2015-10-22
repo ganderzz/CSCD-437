@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>  
 #include <string.h>
+#include <regex.h>
 
-#define BUFF_SIZE 256
+#define BUFF_SIZE 50
+
+typedef enum {false, true} bool;
 
 typedef struct {
 	char * fname;
@@ -10,42 +13,96 @@ typedef struct {
 	int nums[2];
 }user;
 
-int main()
+int getInput(char * in)
 {
 	int i;
 	char buff[BUFF_SIZE];
-	user * u = (user *) malloc(sizeof(user));
-
 	memset(buff, '\0', BUFF_SIZE);
 
-	printf("Enter your First Name: ");
 	fgets(buff, sizeof(buff), stdin);
-
-	u->fname = (char *) calloc( (strlen(buff) + 1), sizeof(char *) );
 
 	for(i = 0; i < BUFF_SIZE; i++)
 	{
-		if(buff[i] != '\n')
-			u->fname[i] = buff[i];
+		if(buff[i] != '\0' & buff[i] != '\n')
+			in[i] = buff[i];
+		else
+		{
+			in[i] = '\0';
+			break;
+		}
 	}
-	i++;
-	u->fname[i] = '\0';
+	
+	return 0;
+}
 
-	printf("Enter your Last Name: ");
-	fgets(buff, sizeof(buff), stdin);
+int main()
+{
+	/* 
+	*	Variable Initialization	
+	*/
+	bool preventPass = true;
+	regex_t name_r;
+	const char * name_r_ptrn = "^[a-zA-Z]+$";
 
-	u->lname = (char *) calloc( (strlen(buff) + 1), sizeof(char *) );
+	user * u = (user *) malloc(sizeof(user));
 
-	for(i = 0; i < BUFF_SIZE; i++)
+	u->lname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char *) );
+	u->fname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char *) );
+
+
+	/* 
+	*	First Name 	
+	*/
+
+	regcomp(&name_r, name_r_ptrn, REG_EXTENDED | REG_NOSUB);
+
+	while( preventPass )
 	{
-		if(buff[i] != '\n')
-			u->lname[i] = buff[i];
-	}
-	i++;
-	u->lname[i] = '\0';
+		preventPass = false;
 
+		printf("Enter your First Name: ");
+		getInput(u->fname);
+
+		int nomatch = regexec(&name_r, u->fname, 0, NULL, 0);
+		if( nomatch == REG_NOMATCH )
+		{
+			printf("\nFirst Name is invalid, try again.\n\n");
+			preventPass = true;
+		}
+	}
+
+
+	/* 
+	*	Last Name 	
+	*/
+	preventPass = true;
+
+	while( preventPass )
+	{
+		preventPass = false;
+
+		printf("Enter your Last Name: ");
+		getInput(u->lname);
+
+		int nomatch = regexec(&name_r, u->lname, 0, NULL, 0);
+		if( nomatch == REG_NOMATCH )
+		{
+			printf("\nLast Name is invalid, try again.\n\n");
+			preventPass = true;
+		}
+	}
+
+
+	/*
+	*	Print Names
+	*/
 	printf("f: %s \nl: %s\n", u->fname, u->lname);
 
+
+	/* 
+	*	Be Free 	
+	*/
+    regfree(&name_r);
 	free(u->fname);
 	free(u->lname);
 
