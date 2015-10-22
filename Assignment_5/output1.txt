@@ -1,0 +1,37 @@
+
+===========================
+Menu Item: l
+String to Test: aion
+Outcome: true
+===========================
+
+===========================
+Menu Item: l
+String to Test: aSDion
+Outcome: true
+===========================
+
+===========================
+Menu Item: j
+String to Test: google.com
+Outcome: true
+===========================
+
+===========================
+Menu Item: h
+String to Test: 23:13:34
+Outcome: true
+===========================
+
+===========================
+Menu Item: a
+String to Test: 234-23-2345
+Outcome: true
+===========================
+
+===========================
+Menu Item: a
+String to Test: afdsdf
+Outcome: false
+===========================
+
