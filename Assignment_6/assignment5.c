@@ -1,11 +1,23 @@
+/*
+	Assignment 6 - Defend Your Code
+	CSCD 437
+
+	Cyber Bacon:
+		Stan Bozhinov
+		Ryan Babcock
+		Dylan Paulus
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>  
 #include <string.h>
 #include <regex.h>
-#include <time.h>
 #include <termios.h>
 #include <unistd.h>
 #include <limits.h>
+#include <time.h>
+#include <openssl/md5.h>
 
 #ifndef HELPER
 	#include "helper.h"
@@ -17,21 +29,35 @@ int main()
 	*	Variable Initialization	
 	*/
 	bool prevent_pass = true;
-	regex_t name_r, num_r;
+	regex_t name_r, num_r, file_r, pass_r;
 
 	const char * const name_r_ptrn = "^[a-zA-Z]+$";
 	const char * const num_r_ptrn = "^[0-9]+$";
+	const char * const file_r_ptrn = "^.*\\.[^\\]+$";
+	const char * const pass_r_ptrn = "^.{6,}$";
 
 	if( regcomp(&name_r, name_r_ptrn, REG_EXTENDED | REG_NOSUB) )
 	{
-		printf("\n%sWoah Cowpoke, Looks like your regexp library is screwed up.%s\n\n", RED, WHITE);
-		return 1;
+		logerror("Con't compile regexp. Try again.");
 	}
 	if( regcomp(&num_r, num_r_ptrn, REG_EXTENDED | REG_NOSUB) )
 	{
-		printf("\n%sWoah Cowpoke, Looks like your regexp library is screwed up.%s\n\n", RED, WHITE);
+		logerror("Con't compile regexp. Try again.");
+	}
+	if( regcomp(&file_r, file_r_ptrn, REG_EXTENDED | REG_NOSUB) )
+	{
+		logerror("Con't compile regexp. Try again.");
+	}
+	if( regcomp(&pass_r, pass_r_ptrn, REG_EXTENDED | REG_NOSUB) )
+	{
+		logerror("Con't compile regexp. Try again.");
 		return 1;
 	}
+
+	FILE * ifp;
+	FILE * ofp;
+
+	long num1, num2;
 
 	user * u = (user *) malloc(sizeof(user));
 
@@ -40,7 +66,6 @@ int main()
 	u->nums = (char **) calloc( 2, sizeof(char *) );
 	u->input = (char *) calloc( (BUFF_SIZE + 1), sizeof(char) );
 	u->output = (char *) calloc( (BUFF_SIZE + 1), sizeof(char) );
-	u->password = (char *) calloc( (BUFF_SIZE + 1), sizeof(char) );
 
 	u->nums[0] = (char *) calloc( (BUFF_SIZE), sizeof(char));
 	u->nums[1] = (char *) calloc( (BUFF_SIZE), sizeof(char));
@@ -92,6 +117,8 @@ int main()
 	{
 		prevent_pass = false;
 
+		memset(u->nums[0], '\0', BUFF_SIZE);
+
 		printf("Enter a Number: ");
 		getInput(u->nums[0]);
 
@@ -99,6 +126,23 @@ int main()
 		if( nomatch == REG_NOMATCH )
 		{
 			printf("\n%sNot a number, try again.%s\n\n", RED, WHITE);
+			prevent_pass = true;
+		}
+
+		char * end;
+		num1 = strtol(u->nums[0], &end, 10);
+
+		/* Check for buffer overflow and underflow */
+		if( num1 > INT_MAX )
+		{
+			logerror("ERROR: The input entered as numbers are too long.");
+			printf("\n%sERROR: The input entered as numbers are too long.%s\n\n", RED, WHITE);
+			prevent_pass = true;
+		}
+		else if( num1 < INT_MIN )
+		{
+			logerror("ERROR: The input entered as numbers are way too negative.");
+			printf("\n%sERROR: The input entered as numbers are way too negative.%s\n\n", RED, WHITE);
 			prevent_pass = true;
 		}
 	}
@@ -109,6 +153,8 @@ int main()
 	{
 		prevent_pass = false;
 
+		memset(u->nums[0], '\0', BUFF_SIZE);
+
 		printf("Enter another a Number: ");
 		getInput(u->nums[1]);
 
@@ -118,38 +164,40 @@ int main()
 			printf("\n%sNot a number, try again.%s\n\n", RED, WHITE);
 			prevent_pass = true;
 		}
+
+		char * end;
+		num2 = strtol(u->nums[1], &end, 10);
+
+		/* Ran into conversion problems? */
+		if( *end )
+		{
+			logerror("ERROR: There was an error coverting the two numbers to type long.");
+			printf("\n%sERROR: There was an error coverting the two numbers to type long.%s\n\n", RED, WHITE);
+			prevent_pass = true;
+		}
+
+		/* Check for buffer overflow and underflow */
+		if( num2 > INT_MAX )
+		{
+			logerror("ERROR: The input entered as numbers are too long.");
+			printf("\n%sERROR: The input entered as numbers are too long.%s\n\n", RED, WHITE);
+			prevent_pass = true;
+		}
+		else if( num2 < INT_MIN )
+		{
+			logerror("ERROR: The input entered as numbers are way too negative.");
+			printf("\n%sERROR: The input entered as numbers are way too negative.%s\n\n", RED, WHITE);
+			prevent_pass = true;
+		}
 	}
 
 	/*
-	*	String to int for nums
+	*	Don't need these anymore
 	*/
-
-	char * end;
-	const long num1 = strtol(u->nums[0], &end, 10);
-	const long num2 = strtol(u->nums[1], &end, 10);
 
 	free(u->nums[0]);
 	free(u->nums[1]);
 	free(u->nums);
-
-	/* Ran into conversion problems? */
-	if( *end )
-	{
-		printf("\n%sERROR: The input entered as numbers were incorrect.%s\n\n", RED, WHITE);
-		return 1;
-	}
-
-	/* Check for buffer overflow and underflow */
-	if( num1 > INT_MAX || num2 > INT_MAX )
-	{
-		printf("\n%sERROR: The input entered as numbers were incorrect.%s\n\n", RED, WHITE);
-		return 1;
-	}
-	else if( num1 < INT_MIN || num2 < INT_MIN )
-	{
-		printf("\n%sERROR: The input entered as numbers were incorrect.%s\n\n", RED, WHITE);
-		return 1;
-	}
 
 	/*
 	*	Get Input File
@@ -164,12 +212,22 @@ int main()
 		printf("Enter an input file: ");
 		getInput(u->input);
 
-		// int nomatch = regexec(&num_r, u->nums[1], 0, NULL, 0);
-		// if( nomatch == REG_NOMATCH )
-		// {
-		// 	printf("\n%sNot a number, try again.%s\n\n", RED, WHITE);
-		// 	prevent_pass = true;
-		// }
+		int nomatch = regexec(&file_r, u->input, 0, NULL, 0);
+		if( nomatch == REG_NOMATCH )
+		{
+			printf("\n%sNot a valid file path.%s\n\n", RED, WHITE);
+			prevent_pass = true;
+		}
+		else {
+			ifp = fopen(u->input, "r");
+			if( ifp == NULL )
+			{
+				fclose(ifp);
+				printf("\n%sInput file does not exist.%s\n\n", RED, WHITE);
+				logerror("Input file does not exist.");
+				prevent_pass = true;
+			}
+		}
 	}
 
 	/*
@@ -185,78 +243,205 @@ int main()
 		printf("Enter a output file: ");
 		getInput(u->output);
 
-		// int nomatch = regexec(&num_r, u->nums[1], 0, NULL, 0);
-		// if( nomatch == REG_NOMATCH )
-		// {
-		// 	printf("\n%sNot a number, try again.%s\n\n", RED, WHITE);
-		// 	prevent_pass = true;
-		// }
+		int nomatch = regexec(&file_r, u->input, 0, NULL, 0);
+		if( nomatch == REG_NOMATCH )
+		{
+			printf("\n%sNot a valid file path.%s\n\n", RED, WHITE);
+			prevent_pass = true;
+		}
 	}
 
 	/*
-	*	Get Password Verify
+	*	Password
 	*/
 
+	FILE * pfp;
+	pfp = fopen("db.txt", "w");
 	prevent_pass = true;
+	while( prevent_pass )
+	{
+		prevent_pass = false;
+		clock_t t;
+		t = clock();
 
+		char * const p = (char *) calloc( (BUFF_SIZE + 1), sizeof(char));
+		char * const v = (char *) calloc( (BUFF_SIZE + 1), sizeof(char));
+
+		printf("\nEnter Password: ");
+		getPassword(p);
+
+		if( check(p) == false )
+		{
+			printf("\n%sNot a valid password. Must be atleast 6 characters with uppercase, lowercase, and digits.%s\n\n", RED, WHITE);
+			prevent_pass = true;
+		}
+
+		int nomatch = regexec(&pass_r, p, 0, NULL, 0);
+		if( nomatch == REG_NOMATCH )
+		{
+			printf("\n%sNot a valid password. Must be atleast 6 characters with uppercase, lowercase, and digits.%s\n\n", RED, WHITE);
+			prevent_pass = true;
+		}
+		else {
+			srand(time(NULL));
+			t = clock() + t;
+
+			int seed = rand() * (int)clock;
+			char salt[40];
+			snprintf(salt, 40, "%d", seed);
+
+			char * const c = hashPassword(p, salt, strlen(p));
+			memset(p, 'a', BUFF_SIZE);
+
+			fprintf(pfp, "%s\n%s", c, salt);
+			memset(salt, '\0', 40);
+			seed = 0;
+
+			free(c);
+		}
+
+		free(p);
+		free(v);
+	}
+	fclose(pfp);
+
+	/*
+	*	Verify
+	*/
+
+	FILE * pofp;
+	pofp = fopen("db.txt", "r");
+	char buff;
+	char * notpassword = (char *) calloc(BUFF_SIZE, sizeof(char));
+	char * salt = (char *) calloc(BUFF_SIZE, sizeof(char));
+
+	int i = 0;
+	bool flag = false;
+	while ((buff = fgetc(pofp)) != EOF)
+	{
+		if(buff == '\n')
+		{
+			flag = true;
+			i = 0;
+		}
+		else if(flag == false)
+			notpassword[i++] = buff;
+		else if(flag == true)
+			salt[i++] = buff;
+	} 
+	fclose(pofp);
+
+	prevent_pass = true;
 	while( prevent_pass )
 	{
 		prevent_pass = false;
 
 		char * const p = (char *) calloc( (BUFF_SIZE + 1), sizeof(char));
-		char * const v = (char *) calloc( (BUFF_SIZE + 1), sizeof(char));
-
-		printf("Enter Password: ");
-		getPassword(p);
 
 		printf("\nVerify Password: ");
-		getPassword(v);
+		getPassword(p);
 
-		if( strcmp(p, v) != 0 )
+		char * const c = hashPassword(p, salt, strlen(p));
+
+		if( strcmp(notpassword, c) != 0 )
 		{
-			printf("\n%sPasswords do not match.%s\n\n", RED, WHITE);
+			printf("\n%sPassword does not match.%s\n\n", RED, WHITE);
 			prevent_pass = true;
 		}
-		memset(v, 'a', BUFF_SIZE);
 
-		// int nomatch = regexec(&num_r, u->nums[1], 0, NULL, 0);
-		// if( nomatch == REG_NOMATCH )
-		// {
-		// 	printf("\n%sNot a number, try again.%s\n\n", RED, WHITE);
-		// 	prevent_pass = true;
-		// }
-
-		const char * const c = crypt(p, "$1$hi$");
-		memset(p, 'a', BUFF_SIZE);
-
-		strncpy(u->password, c, BUFF_SIZE);
 
 		free(p);
-		free(v);
 	}
+	free(notpassword);
+	free(salt);
+
+
+	printf("\nSuccess!\n");
 
 	/*
-	*	Print Names
+	*	Print results to file
 	*/
 
-	printf("\nf: %s \nl: %s\nn1: %ld\nn2: %ld\n", u->fname, u->lname, num1, num2);
+	ofp = fopen(u->output, "w");
 
+	if( ifp == NULL || ofp == NULL)
+	{
+		printf("\n%sThere was an error opening the output file%s\n\n", RED, WHITE);
+		return 1;
+	}
+
+	fprintf(ofp, "%s %s %ld %ld\n\n", u->fname, u->lname, (num1 + num2), (num1 * num2));
+
+	// Write input file to output
+	char in_file_char;
+	while ((in_file_char = fgetc(ifp)) != EOF) 
+      fputc(in_file_char, ofp);
+
+    printf("\n\nFile has been written.\nExiting...\n\n");
 
 	/* 
 	*	Be Free 	
 	*/
     regfree(&name_r);
     regfree(&num_r);
+    regfree(&file_r);
+
+    fclose(ifp);
+    fclose(ofp);
 
 	free(u->fname);
 	free(u->lname);
 	free(u->input);
 	free(u->output);
-	free(u->password);
 
 	free(u);
 
 	return 0;
+}
+
+bool check(const char * const str)
+{
+	int i;
+	bool lower = false, upper = false, digit = false;
+
+	for(i = 0; i < (int)strlen(str); i++)
+	{
+		lower = lower || (str[i] >= 'a' && str[i] <= 'z');
+		upper = upper || (str[i] >= 'A' && str[i] <= 'Z');
+		digit = digit || (str[i] >= '0' && str[i] <= '9');
+
+		if(upper && lower && digit)
+			return true;
+	}
+
+	return false;
+}
+
+int logerror(const char * const message)
+{
+	FILE * lfp;
+	lfp = fopen("error.log", "a");
+	fprintf(lfp, "%s\n", message);
+	fclose(lfp);
+
+	return 0;
+}
+
+char * hashPassword(const char * const password, const char * const salt, unsigned long length)
+{
+	MD5_CTX ctx;
+	unsigned char output[16];
+
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, password, length);
+    MD5_Update(&ctx, salt, strlen(salt));
+    MD5_Final(output, &ctx);
+
+    char * result = (char *) calloc(sizeof(char) * 32, sizeof(char));
+	for(int i = 0; i < 16; ++i)
+    	sprintf(&result[i*2], "%02x", (unsigned int)output[i]);
+
+    return result;
 }
 
 void getPassword(char * const password)

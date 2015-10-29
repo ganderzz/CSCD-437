@@ -1,5 +1,5 @@
 all:
-		gcc -pedantic -Wall -Wextra -Werror assignment5.c -o a5.out
+		gcc -I/usr/local/ssl/include -L/usr/lib -lssl -lcrypto -pedantic -Wall -Wextra -Werror assignment5.c -o a5.out
 
 debug:
 		gcc -g -pedantic -Wall -Wextra -Werror assignment5.c -o a5.out
@@ -9,3 +9,6 @@ run:
 
 clean:
 		rm a5.out
+		rm db.txt
+		rm error.log
+		rm out.txt
