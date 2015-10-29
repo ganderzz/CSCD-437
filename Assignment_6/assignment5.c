@@ -33,7 +33,7 @@ int main()
 
 	const char * const name_r_ptrn = "^[a-zA-Z]+$";
 	const char * const num_r_ptrn = "^[0-9]+$";
-	const char * const file_r_ptrn = "^.*\\.[^\\]+$";
+	const char * const file_r_ptrn = "^(.*)(.txt)$";
 	const char * const pass_r_ptrn = "^.{6,}$";
 
 	if( regcomp(&name_r, name_r_ptrn, REG_EXTENDED | REG_NOSUB) )
@@ -61,12 +61,7 @@ int main()
 
 	user * u = (user *) malloc(sizeof(user));
 
-	u->lname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char) );
-	u->fname = (char *) calloc( (BUFF_SIZE + 1), sizeof(char) );
-	u->nums = (char **) calloc( 2, sizeof(char *) );
-	u->input = (char *) calloc( (BUFF_SIZE + 1), sizeof(char) );
-	u->output = (char *) calloc( (BUFF_SIZE + 1), sizeof(char) );
-
+	u->nums = (char **) calloc( BUFF_SIZE, sizeof(char *));
 	u->nums[0] = (char *) calloc( (BUFF_SIZE), sizeof(char));
 	u->nums[1] = (char *) calloc( (BUFF_SIZE), sizeof(char));
 
@@ -133,13 +128,13 @@ int main()
 		num1 = strtol(u->nums[0], &end, 10);
 
 		/* Check for buffer overflow and underflow */
-		if( num1 > INT_MAX )
+		if( num1 > ((INT_MAX/4) - 1) )
 		{
 			logerror("ERROR: The input entered as numbers are too long.");
 			printf("\n%sERROR: The input entered as numbers are too long.%s\n\n", RED, WHITE);
 			prevent_pass = true;
 		}
-		else if( num1 < INT_MIN )
+		else if( num1 < ((INT_MIN/4) + 1 ) )
 		{
 			logerror("ERROR: The input entered as numbers are way too negative.");
 			printf("\n%sERROR: The input entered as numbers are way too negative.%s\n\n", RED, WHITE);
@@ -177,13 +172,13 @@ int main()
 		}
 
 		/* Check for buffer overflow and underflow */
-		if( num2 > INT_MAX )
+		if( num2 > INT_MAX || (num1 * num2) > INT_MAX || (num1 + num2) > INT_MAX )
 		{
 			logerror("ERROR: The input entered as numbers are too long.");
 			printf("\n%sERROR: The input entered as numbers are too long.%s\n\n", RED, WHITE);
 			prevent_pass = true;
 		}
-		else if( num2 < INT_MIN )
+		else if( num2 < INT_MIN || (num1 * num2) < INT_MIN || (num1 + num2) < INT_MIN )
 		{
 			logerror("ERROR: The input entered as numbers are way too negative.");
 			printf("\n%sERROR: The input entered as numbers are way too negative.%s\n\n", RED, WHITE);
@@ -243,7 +238,7 @@ int main()
 		printf("Enter a output file: ");
 		getInput(u->output);
 
-		int nomatch = regexec(&file_r, u->input, 0, NULL, 0);
+		int nomatch = regexec(&file_r, u->output, 0, NULL, 0);
 		if( nomatch == REG_NOMATCH )
 		{
 			printf("\n%sNot a valid file path.%s\n\n", RED, WHITE);
@@ -370,6 +365,7 @@ int main()
 		return 1;
 	}
 
+
 	fprintf(ofp, "%s %s %ld %ld\n\n", u->fname, u->lname, (num1 + num2), (num1 * num2));
 
 	// Write input file to output
@@ -388,11 +384,6 @@ int main()
 
     fclose(ifp);
     fclose(ofp);
-
-	free(u->fname);
-	free(u->lname);
-	free(u->input);
-	free(u->output);
 
 	free(u);
 
@@ -473,7 +464,7 @@ int getInput(char * const in)
 
 	for(i = 0; i < BUFF_SIZE; i++)
 	{
-		if(buff[i] != '\0' & buff[i] != '\n')
+		if(buff[i] != '\0' && buff[i] != '\n')
 			in[i] = buff[i];
 		else
 		{

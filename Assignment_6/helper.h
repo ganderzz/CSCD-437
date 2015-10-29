@@ -3,7 +3,6 @@
 */
 #define HELPER
 #define BUFF_SIZE 50
-#define KEY_SIZE 256
 #define RED  "\x1B[31m"
 #define WHITE  "\x1B[0m"
 
@@ -13,11 +12,11 @@
 typedef enum {false, true} bool;
 
 typedef struct {
-	char * fname;
-	char * lname;
+	char fname[BUFF_SIZE];
+	char lname[BUFF_SIZE];
 	char ** nums;
-	char * input;
-	char * output;
+	char input[BUFF_SIZE];
+	char output[BUFF_SIZE];
 }user;
 
 /*
