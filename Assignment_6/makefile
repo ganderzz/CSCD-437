@@ -1,14 +1,14 @@
 all:
-		gcc -I/usr/local/ssl/include -L/usr/lib -lssl -lcrypto -pedantic -Wall -Wextra -Werror assignment5.c -o a5.out
+		gcc -I/usr/local/ssl/include -L/usr/lib -lssl -lcrypto -pedantic -Wall -Wextra -Werror assignment6.c -o a6.out
 
 debug:
-		gcc -g -I/usr/local/ssl/include -L/usr/lib -lssl -lcrypto -pedantic -Wall -Wextra -Werror assignment5.c -o a5.out
+		gcc -g -I/usr/local/ssl/include -L/usr/lib -lssl -lcrypto -pedantic -Wall -Wextra -Werror assignment6.c -o a6.out
 
 run:
-		./a5.out
+		./a6.out
 
 clean:
-		rm a5.out
+		rm a6.out
 		rm db.txt
 		rm error.log
 		rm out.txt
