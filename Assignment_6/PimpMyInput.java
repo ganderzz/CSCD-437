@@ -180,11 +180,10 @@ public class PimpMyInput {
             if(!m.matches()) {
                throw new IllegalArgumentException("Password invalid");
             }
-            seed = new String(sr.generateSeed(20));
+            seed = new BigInteger(1, sr.generateSeed(20)).toString(20);
             password = seed + password;
-            md.update(password.getBytes());
-            pw_hashed = new String(md.digest());
-            pw_hashed.replaceAll("\n", "");
+            md.update(password.getBytes("UTF-8"));
+            pw_hashed = new BigInteger(1, md.digest()).toString();
             break;
          }
          catch(Exception e) {
@@ -195,7 +194,7 @@ public class PimpMyInput {
       //Store Password
       try {
          fwPassword = new FileWriter(new File(pw_filename));
-         fwPassword.write(pw_hashed + "\n" + seed);
+         fwPassword.write(seed + "\n" + pw_hashed);
          fwPassword.close();
       }
       catch(IOException e) {
@@ -212,14 +211,12 @@ public class PimpMyInput {
             }
             frPassword = new FileReader(pw_filename);
             brPassword = new BufferedReader(frPassword);
-            rePassword = brPassword.readLine();
             seed = brPassword.readLine();
-
+            rePassword = brPassword.readLine();
             password = seed + password;
-            md.update(password.getBytes());
-            pw_hashed = new String(md.digest());
-            pw_hashed.replaceAll("\n", "");
-
+            md.update(password.getBytes("UTF-8"));
+            pw_hashed = new BigInteger(1, md.digest()).toString();
+            
             if(!(pw_hashed.equals(rePassword))) {
                throw new Exception("Passwords do not match!");
             }
@@ -228,6 +225,8 @@ public class PimpMyInput {
          catch(Exception e) {
             err_string += e + "\n";
             System.out.println("P1: " + rePassword + "\nP2: " + pw_hashed);
+            seed = "";
+            rePassword = "";
          }
       }//endwhile
       try {
