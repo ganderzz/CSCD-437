@@ -1,8 +1,8 @@
 all:
-		gcc -I/usr/local/ssl/include -L/usr/lib -lssl -lcrypto -pedantic -Wall -Wextra -Werror assignment6.c -o a6.out
+		gcc -I/usr/local/ssl/include -lssl -lcrypto -pedantic -Wall -Wextra -Werror assignment6.c -o a6.out
 
 debug:
-		gcc -g -I/usr/local/ssl/include -L/usr/lib -lssl -lcrypto -pedantic -Wall -Wextra -Werror assignment6.c -o a6.out
+		gcc -g -I/usr/local/ssl/include -lssl -lcrypto -pedantic -Wall -Wextra -Werror assignment6.c -o a6.out
 
 run:
 		./a6.out

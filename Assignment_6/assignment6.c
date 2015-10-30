@@ -1,12 +1,12 @@
 /*
-	Assignment 6 - Defend Your Code
-	CSCD 437
-
-	Cyber Bacon:
-		Stan Bozhinov
-		Ryan Babcock
-		Dylan Paulus
-
+*	Assignment 6 - Defend Your Code
+*	CSCD 437
+*
+*	Cyber Bacon:
+*		Stan Bozhinov
+*		Ryan Babcock
+*		Dylan Paulus
+*
 */
 
 #include <stdio.h>
